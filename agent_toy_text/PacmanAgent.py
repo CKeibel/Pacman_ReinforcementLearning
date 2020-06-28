@@ -175,26 +175,26 @@ class PacmanAgent(object):
 
         self.model.train(states, q_values)
 
-        def play(self, num_episodes):
-            self.model.load_model("Pacman_1000_runs.h5")
+    def play(self, num_episodes):
+        self.model.load_model("Pacman_1000_runs.h5")
 
-            for episode in range(num_episodes):
-                state = self.env.reset()
-                state = self.state_presenter(state)
-                state = np.reshape(state, (1, state.shape[0]))
-                total_reward = 0.0
+        for episode in range(num_episodes):
+            state = self.env.reset()
+            state = self.state_presenter(state)
+            state = np.reshape(state, (1, state.shape[0]))
+            total_reward = 0.0
 
-                while True:
-                    action = self.act(state, False)
-                    next_state, reward, done, _ = self.env.step(action)
-                    next_state = self.state_presenter(next_state)
-                    next_state = np.reshape(next_state, (1, next_shape.shape[0]))
-                    state = next_state
-                    total_reward += reward
-                    
-                    if done:
-                        print("Reward:", total_reward)
-                        break
+            while True:
+                action = self.act(state, False)
+                next_state, reward, done, _ = self.env.step(action)
+                next_state = self.state_presenter(next_state)
+                next_state = np.reshape(next_state, (1, next_shape.shape[0]))
+                state = next_state
+                total_reward += reward
+                
+                if done:
+                    print("Reward:", total_reward)
+                    break
 
 
 
