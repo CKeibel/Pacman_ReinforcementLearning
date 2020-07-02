@@ -101,7 +101,7 @@ class PacmanAgent(object):
                 next_state, reward, done, _ = self.env.step(action)
                 total_reward += reward
 
-                if done and total_reward < 16:
+                if done and total_reward < 15:
                     reward = -100
 
                 self.remember(state, action_int, reward, next_state, done)
