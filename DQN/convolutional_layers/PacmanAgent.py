@@ -33,7 +33,7 @@ class PacmanAgent(object):
         self.img_shape = (84, 84, 3) # pixels, pixels, rgb
 
         # DQN Agent Variables
-        self.replay_buffer_size = 60000
+        self.replay_buffer_size = 100000
         self.train_start = 3000
         self.memory = collections.deque(maxlen=self.replay_buffer_size)
         self.gamma = 0.95
@@ -47,7 +47,7 @@ class PacmanAgent(object):
         self.target_model = DQN(self.img_shape, self.actions, self.lr)
         self.target_model.update_model(self.model)
         self.batch_size = 32
-        self.sync_models = 10000
+        self.sync_models = 100
         self.path_model = "pacman_model.h5"
         self.path_target_model = "pacman_targetmodel.h5"
         self.load = False
@@ -118,9 +118,24 @@ class PacmanAgent(object):
                     df = pd.DataFrame([total_reward], columns=['Rewards'])
                     df.to_csv("total_rewards.csv", index=False, mode="a", header="False")
 
-                    print("Episode:", episode+1, "\tMemSize:", len(self.memory), "\tReward:", total_reward, "\tMean:", mean_reward)
+                    print("Episode:", episode+1, "\tMemSize:", len(self.memory), "\tReward:", total_reward, "\tMean:", mean_reward, "\tE:", self.epsilon)
                     self.model.save_model(self.path_model)
                     self.target_model.save_model(self.path_target_model)
+                    
+                    # Saving
+                    if episode+1 == 100:
+                        self.model.save_model("pacman_100runs.h5")
+                    elif episode+1 == 500:
+                        self.model.save_model("pacman_500runs.h5")
+                    elif episode+1 == 1000:
+                        self.model.save_model("pacman_1000runs.h5")
+                    elif episode+1 == 2500:
+                        self.model.save_model("pacman_2500runs.h5")
+                    elif episode+1 == 5000:
+                        self.model("pacman_5000runs.h5")
+
+                    if mean_reward > 14.5:
+                        self.model.save_model("pacman_good_rewards.h5")
                     break
             
     def epsilon_anneal(self):
@@ -186,8 +201,7 @@ if __name__ == '__main__':
     env = wrappers.Monitor(env, directory=outdir, force=True)
     env.seed(0)
     agent = PacmanAgent(env)
-    agent.train(num_episodes=1)
-    agent.model.save_model('pacman_10000_runs.h5')
+    agent.train(num_episodes=5000)
     
        
 
