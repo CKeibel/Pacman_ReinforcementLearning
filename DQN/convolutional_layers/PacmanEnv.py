@@ -287,6 +287,7 @@ class PacmanEnv(gym.Env):
                 draw.rectangle((x*12, y*12, x*12+12, y*12+12), fill=(0, 0, 0))
     #im.show()
     im = np.array(im)
+    im = np.reshape(im, (1, 84, 84, 3))
         
     return im
 
