@@ -34,7 +34,7 @@ class PacmanAgent(object):
 
         # DQN Agent Variables
         self.replay_buffer_size = 100000
-        self.train_start = 3000
+        self.train_start = 1000
         self.memory = collections.deque(maxlen=self.replay_buffer_size)
         self.gamma = 0.95
         self.epsilon = 1.0
@@ -156,7 +156,6 @@ class PacmanAgent(object):
 
         states = np.concatenate(states)
         states_next = np.concatenate(states_next)
-
         q_values = self.model.predict(states)
         q_values_next = self.target_model.predict(states_next)
 
