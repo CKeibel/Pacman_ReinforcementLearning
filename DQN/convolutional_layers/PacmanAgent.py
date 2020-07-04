@@ -15,9 +15,6 @@ from PIL import Image, ImageDraw
 
 
 
-# TODO Die gewünschte Anzahl an zu spielenden Spielen
-episode_count = 100
-
 # TODO Verzeichnis für die Ergebnisse der Spiele
 # Default unter gym/results
 outdir = './results'
@@ -115,7 +112,7 @@ class PacmanAgent(object):
 
                 if done:
                     if total_reward < 60:
-                        reward += 100
+                        total_reward += 100 # only for output
                     total_rewards.append(total_reward)
                     mean_reward = np.mean(total_rewards[-5:])
                     df = pd.DataFrame([total_reward], columns=['Rewards'])
