@@ -115,8 +115,7 @@ class PacmanAgent(object):
                         total_reward += 100 # only for output
                     total_rewards.append(total_reward)
                     mean_reward = np.mean(total_rewards[-5:])
-                    df = pd.DataFrame([total_reward], columns=['Rewards'])
-                    df.to_csv("total_rewards.csv", index=False, mode="a", header="False")
+                    
 
                     print("Episode:", episode+1, "\tMemSize:", len(self.memory), "\tReward:", total_reward, "\tMean:", mean_reward, "\tE:", self.epsilon)
                     self.model.save_model(self.path_model)
@@ -140,6 +139,9 @@ class PacmanAgent(object):
                         self.model.save_model("pacman_best_rewards.h5")
                         self.best_mean_reward = mean_reward
                     break
+
+        return total_rewards
+
             
     def epsilon_anneal(self):
         if len(self.memory) < self.train_start:
@@ -203,7 +205,9 @@ if __name__ == '__main__':
     env = wrappers.Monitor(env, directory=outdir, force=True)
     env.seed(0)
     agent = PacmanAgent(env)
-    agent.train(num_episodes=5000)
+    total_rewards = agent.train(num_episodes=5000)
+    df = pd.DataFrame(total_rewards, columns=['Rewards'])
+    df.to_csv("total_rewards.csv", index=False, mode="a", header="False")
     #agent.play(2)
     
        
