@@ -123,7 +123,7 @@ class PacmanAgent(object):
                     if mean_reward > 85:
                         self.model.save_actor("pacman_good_rewards.h5")
                     if mean_reward > self.best_mean_reward:
-                        self.model.save_actor"pacman_best_rewards.h5")
+                        self.model.save_actor("pacman_best_rewards.h5")
                         self.best_mean_reward = mean_reward
                     break
         return total_rewards
