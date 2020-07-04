@@ -141,8 +141,8 @@ class PacmanEnv(gym.Env):
     self.actionEffect = ""
     self.percept = None
     self.totalDots = -1
-    self.reward_dots = 16
-    self.tmp_dots = 16
+    self.reward_dots = 19
+    self.tmp_dots = 19
     self.steps = 0
 
     
@@ -163,24 +163,41 @@ class PacmanEnv(gym.Env):
     # reward
     self.steps += 1
     
+    # if self.percept is None:
+    #     reward = 0
+    # elif self.steps > 4:
+    #     self.tmp_dots = self.countDots(self.percept['view'])
+    #     if self.reward_dots > self.tmp_dots:   
+    #         reward = 1000
+    #         if self.tmp_dots <= 1:
+    #             reward = 1000
+    #         self.reward_dots = self.tmp_dots
+    #     else:
+    #         reward = -5
+    # else: 
+    #     reward = 0
+
     if self.percept is None:
         reward = 0
-    elif self.steps > 4:
-        self.tmp_dots = self.countDots(self.percept['view'])
-        if self.reward_dots > self.tmp_dots:   
-            reward = 1
-            self.reward_dots = self.tmp_dots
+    else:
+        if self.steps > 3:
+            self.tmp_dots = self.countDots(self.percept['view'])
+            if self.reward_dots > self.tmp_dots:
+                reward = (self.reward_dots - self.tmp_dots)*5
+                self.reward_dots = self.tmp_dots
+            else:
+                reward = -2
         else:
             reward = 0
-    else: 
-        reward = 0
+
+        
 
 
         
 
     # observation
     if self.percept is None:
-        ob = [['E' for _ in range(7)] for _ in range(7)]
+        ob = self.initial_state()
     else:
         ob = self.percept['view']
 
@@ -210,14 +227,15 @@ class PacmanEnv(gym.Env):
         elif js["class"] == "PacmanGameResult":
             done = True
             pass
+
     
     return ob, reward, done, {}
   
   def reset(self):
     # resseting
-    self.reward_dots = self.tmp_dots = 16
+    self.reward_dots = self.tmp_dots = 19
     self.steps = 0
-    ob = [['E' for _ in range(7)] for _ in range(7)]
+    ob = self.initial_state()
     ob = self.draw_state(ob)
 
 
@@ -290,4 +308,16 @@ class PacmanEnv(gym.Env):
     im = np.reshape(im, (1, 84, 84, 3))
         
     return im
+
+  def initial_state(self):
+    state = [['W' for _ in range(7)],
+            ['W', 'P', 'D', 'D', 'D', 'D', 'W'],
+            ['W', 'D', 'W', 'D', 'W', 'D', 'W'],
+            ['W', 'D', 'D', 'D', 'D', 'D', 'W'],
+            ['W', 'D', 'W', 'D', 'W', 'D', 'W'],
+            ['W', 'D', 'D', 'D', 'D', 'G', 'W'],
+            ['W' for _ in range(7)]]
+    return state
+
+
 
