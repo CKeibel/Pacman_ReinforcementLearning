@@ -44,12 +44,24 @@ class NN(Model):
     def predict_actor(self, states):
         return self.actor.predict(states)
 
+    def save_actor(self, path):
+        self.actor.save_weights(path)
+
+    def load_actor(self, path):
+        self.actor.load_weights(path)
+
     # Critic Functions
     def train_critic(self, states, values):
         self.critic.fit(states, values, verbose=0)
 
     def predict_critic(self, states):
         return self.critic.predict(states)
+
+    def save_critic(self, path):
+        self.critic.save_weights(path)
+
+    def load_critic(self, path):
+        self.critic.load_weights(path)
 
 
 

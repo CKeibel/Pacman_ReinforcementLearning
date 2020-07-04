@@ -90,7 +90,7 @@ class PacmanAgent(object):
             while True:
                 action, action_int = self.act(state)
                 next_state, reward, done, _ = self.env.step(action)
-                if done and total_reward < 60:
+                if done and total_reward < 85:
                     reward = -100
 
                 self.update_policy(state, action_int, reward, next_state, done)
@@ -99,8 +99,8 @@ class PacmanAgent(object):
                 state = next_state
 
                 if done:
-                    if total_reward < 60:
-                        reward += 100
+                    if total_reward < 85:
+                        total_reward += 100
                     total_rewards.append(total_reward)
                     mean_reward = np.mean(total_rewards[-5:])
                     
@@ -110,20 +110,20 @@ class PacmanAgent(object):
                     
                     # Saving
                     if episode+1 == 100:
-                        self.model.save_model("pacman_100runs.h5")
+                        self.model.save_actor("pacman_100runs.h5")
                     elif episode+1 == 500:
-                        self.model.save_model("pacman_500runs.h5")
+                        self.model.save_actor("pacman_500runs.h5")
                     elif episode+1 == 1000:
-                        self.model.save_model("pacman_1000runs.h5")
+                        self.model.save_actor("pacman_1000runs.h5")
                     elif episode+1 == 2500:
-                        self.model.save_model("pacman_2500runs.h5")
+                        self.model.save_actor("pacman_2500runs.h5")
                     elif episode+1 == 5000:
-                        self.model.save_model("pacman_5000runs.h5")
+                        self.model.save_actor("pacman_5000runs.h5")
 
-                    if mean_reward > 55:
-                        self.model.save_model("pacman_good_rewards.h5")
+                    if mean_reward > 85:
+                        self.model.save_actor("pacman_good_rewards.h5")
                     if mean_reward > self.best_mean_reward:
-                        self.model.save_model("pacman_best_rewards.h5")
+                        self.model.save_actor"pacman_best_rewards.h5")
                         self.best_mean_reward = mean_reward
                     break
         return total_rewards
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     env = wrappers.Monitor(env, directory=outdir, force=True)
     env.seed(0)
     agent = PacmanAgent(env)
-    total_rewards = agent.train(num_episodes=10)
+    total_rewards = agent.train(num_episodes=5000)
     df = pd.DataFrame(total_rewards, columns=['Rewards'])
     df.to_csv("total_rewards.csv", index=False, mode="a", header="False")
     #agent.play(2)
