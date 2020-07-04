@@ -186,7 +186,7 @@ class PacmanEnv(gym.Env):
                 reward = (self.reward_dots - self.tmp_dots)*5
                 self.reward_dots = self.tmp_dots
             else:
-                reward = -2
+                reward = 0
         else:
             reward = 0
 
