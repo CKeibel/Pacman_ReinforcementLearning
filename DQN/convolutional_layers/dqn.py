@@ -18,9 +18,9 @@ class DQN(Model):
         
         x = Conv2D(filters=8, kernel_size=(3, 3), strides=(2, 2), padding="same")(img)
         x = Activation("relu")(x)
-        x = Conv2D(filters=16, kernel_size=(3, 3), strides=(2, 2), padding="same")(img)
+        x = Conv2D(filters=16, kernel_size=(3, 3), strides=(2, 2), padding="same")(x)
         x = Activation("relu")(x)
-        x = Conv2D(filters=32, kernel_size=(4, 4), strides=(2, 2), padding="same")(img)
+        x = Conv2D(filters=32, kernel_size=(4, 4), strides=(2, 2), padding="same")(x)
         x = Activation("relu")(x)
         x = GlobalAveragePooling2D()(x)
         x = Dense(256)(x)
