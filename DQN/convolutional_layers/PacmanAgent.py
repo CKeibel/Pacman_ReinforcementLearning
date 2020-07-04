@@ -99,7 +99,7 @@ class PacmanAgent(object):
                 action, action_int = self.act(state, True)
                 next_state, reward, done, _ = self.env.step(action)
                 total_reward += reward
-                if done and total_reward < 60:
+                if done and total_reward < 85:
                     reward = -100
 
                 self.remember(state, action_int, reward, next_state, done)
@@ -111,7 +111,7 @@ class PacmanAgent(object):
                     self.target_model.update_model(self.model)
 
                 if done:
-                    if total_reward < 60:
+                    if total_reward < 85:
                         total_reward += 100 # only for output
                     total_rewards.append(total_reward)
                     mean_reward = np.mean(total_rewards[-5:])
@@ -133,7 +133,7 @@ class PacmanAgent(object):
                     elif episode+1 == 5000:
                         self.model.save_model("pacman_5000runs.h5")
 
-                    if mean_reward > 55:
+                    if mean_reward > 85:
                         self.model.save_model("pacman_good_rewards.h5")
                     if mean_reward > self.best_mean_reward:
                         self.model.save_model("pacman_best_rewards.h5")
