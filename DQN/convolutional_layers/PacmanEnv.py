@@ -8,6 +8,7 @@ import threading
 import json
 from builtins import print
 from struct import unpack
+import collections
 
 from PIL import Image, ImageDraw
 
@@ -134,9 +135,16 @@ class PacmanEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
   def __init__(self):
+    #Framestack
+    self.buffer_frames = 2
+    self.frames = collections.deque(maxlen=self.buffer_frames)
+    #self.frame_stack = np.zeros(shape=(1, 84, 84, 3*self.buffer_frames), dtype=np.float32)
     
     self.action_space = spaces.Discrete(4)#up, left, right, down
-    self.observation_space = spaces.box.Box(low=0, high=255, shape=(84, 84, 3), dtype=np.uint8)
+    self.observation_space = spaces.box.Box(low=16, high=255, shape=(84, 84, 1), dtype=np.uint8)
+    low = np.repeat(self.observation_space.low[np.newaxis, ...], self.buffer_frames, axis=0)
+    high = np.repeat(self.observation_space.high[np.newaxis, ...], self.buffer_frames, axis=0)
+    self.observation_space = gym.spaces.Box(low=low, high=high, dtype=self.observation_space.dtype)
 
     self.actionEffect = ""
     self.percept = None
@@ -144,6 +152,8 @@ class PacmanEnv(gym.Env):
     self.reward_dots = 19
     self.tmp_dots = 19
     self.steps = 0
+
+    
 
     
     t = BGThread()
@@ -176,14 +186,13 @@ class PacmanEnv(gym.Env):
     #         reward = -5
     # else: 
     #     reward = 0
-
     if self.percept is None:
         reward = 0
     else:
         if self.steps > 3:
             self.tmp_dots = self.countDots(self.percept['view'])
             if self.reward_dots > self.tmp_dots:
-                reward = (self.reward_dots - self.tmp_dots)*5
+                reward = (self.reward_dots - self.tmp_dots)*5 
                 self.reward_dots = self.tmp_dots
             else:
                 reward = 0
@@ -202,7 +211,10 @@ class PacmanEnv(gym.Env):
         ob = self.percept['view']
 
     ob = self.draw_state(ob)
-
+    # buffer Frames
+    self.frames.append(ob)
+    frame_stack = np.asarray(self.frames, dtype=np.float32)
+    frame_stack = np.moveaxis(frame_stack, 0, -1).reshape(1, 84, 84, -1)
 
         
     
@@ -229,7 +241,7 @@ class PacmanEnv(gym.Env):
             pass
 
     
-    return ob, reward, done, {}
+    return frame_stack, reward, done, {}
   
   def reset(self):
     # resseting
@@ -237,6 +249,12 @@ class PacmanEnv(gym.Env):
     self.steps = 0
     ob = self.initial_state()
     ob = self.draw_state(ob)
+    self.frames = collections.deque(maxlen=self.buffer_frames)
+    frame_stack = np.zeros(shape=(1, 84, 84, 1*self.buffer_frames), dtype=np.float32)
+    #print(frame_stack.shape)
+    
+    for i in range(self.buffer_frames):
+        self.frames.append(ob)
 
 
     if self.actionEffect == "" :
@@ -250,8 +268,9 @@ class PacmanEnv(gym.Env):
                 break
     print("Resetted")
     
-    return ob ################################################################ Inital State je nach Map anpassen
-  
+    return frame_stack 
+
+
   def render(self, mode='human'):
     ...
   def close(self):
@@ -302,10 +321,11 @@ class PacmanEnv(gym.Env):
             elif state[y][x] == 'D':
                 draw.rectangle((x*12, y*12, x*12+12, y*12+12), fill=(255, 255, 255))
             elif state[y][x] == 'E':
-                draw.rectangle((x*12, y*12, x*12+12, y*12+12), fill=(0, 0, 0))
+                draw.rectangle((x*12, y*12, x*12+12, y*12+12), fill=(0, 204, 0))
     #im.show()
+    im = im.convert('L')
     im = np.array(im)
-    im = np.reshape(im, (1, 84, 84, 3))
+    im = np.reshape(im, (1, 84, 84, 1))
         
     return im
 

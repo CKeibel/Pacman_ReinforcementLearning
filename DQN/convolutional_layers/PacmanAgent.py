@@ -10,6 +10,7 @@ import numpy as np
 import random
 import pandas as pd
 from PIL import Image, ImageDraw
+import matplotlib.pyplot as plt
 
 
 
@@ -27,7 +28,7 @@ class PacmanAgent(object):
         # env variables
         self.env = env
         self.actions = self.env.action_space.n
-        self.img_shape = (84, 84, 3) # pixels, pixels, rgb
+        self.img_shape = (84, 84, 2) # pixels, pixels, rgb
 
         # DQN Agent Variables
         self.replay_buffer_size = 100000
@@ -39,7 +40,7 @@ class PacmanAgent(object):
         self.epsilon_steps = 100000
         self.epsilon_step = (self.epsilon - self.epsilon_min) / self.epsilon_steps        
         # DQN Network Variables
-        self.lr = 0.0003
+        self.lr = 0.00025
         self.model = DQN(self.img_shape, self.actions, self.lr)
         self.target_model = DQN(self.img_shape, self.actions, self.lr)
         self.target_model.update_model(self.model)
@@ -92,16 +93,24 @@ class PacmanAgent(object):
 
         for episode in range(num_episodes):
             total_reward = 0.0
+            dot_count = 0
             state = self.env.reset()
 
             while True:
                 it += 1
                 action, action_int = self.act(state, True)
                 next_state, reward, done, _ = self.env.step(action)
-                total_reward += reward
-                if done and total_reward < 85:
-                    reward = -100
 
+                # No Dot eaten
+                if reward == 0:
+                    reward = -1
+                # Dot eaten
+                if reward == 5:
+                    dot_count += reward / 5
+                #print("Reward:", reward, "Dot Count:", dot_count)
+                total_reward += reward
+                if done and dot_count < 18:
+                    reward -= 120
                 self.remember(state, action_int, reward, next_state, done)
                 self.epsilon_anneal()
                 self.replay()
@@ -111,10 +120,10 @@ class PacmanAgent(object):
                     self.target_model.update_model(self.model)
 
                 if done:
-                    if total_reward < 85:
-                        total_reward += 100 # only for output
+                    if dot_count < 18:
+                        reward += 120 # only for output
                     total_rewards.append(total_reward)
-                    mean_reward = np.mean(total_rewards[-5:])
+                    mean_reward = np.mean(total_rewards[-min(len(total_rewards), 10):])
                     
 
                     print("Episode:", episode+1, "\tMemSize:", len(self.memory), "\tReward:", total_reward, "\tMean:", mean_reward, "\tE:", self.epsilon)
@@ -122,22 +131,20 @@ class PacmanAgent(object):
                     self.target_model.save_model(self.path_target_model)
                     
                     # Saving
-                    if episode+1 == 100:
-                        self.model.save_model("pacman_100runs.h5")
-                    elif episode+1 == 500:
-                        self.model.save_model("pacman_500runs.h5")
-                    elif episode+1 == 1000:
-                        self.model.save_model("pacman_1000runs.h5")
-                    elif episode+1 == 2500:
-                        self.model.save_model("pacman_2500runs.h5")
-                    elif episode+1 == 5000:
-                        self.model.save_model("pacman_5000runs.h5")
-
-                    if mean_reward > 85:
-                        self.model.save_model("pacman_good_rewards.h5")
-                    if mean_reward > self.best_mean_reward:
-                        self.model.save_model("pacman_best_rewards.h5")
-                        self.best_mean_reward = mean_reward
+                    if self.epsilon < self.epsilon_min:
+                        if episode == 15000:
+                            self.model.save_model("pacman_15000.h5")
+                        if episode == 18000:
+                            self.model.save_model("pacman_18000.h5")
+                        if episode == 20000:
+                            self.model.save_model("pacman_20000.h5")
+                        if episode == 22000:
+                            self.model.save_model("pacman_22000.h5")
+                        if mean_reward > 80:
+                            self.model.save_model("pacman_good_rewards.h5")
+                        if mean_reward > self.best_mean_reward:
+                            self.model.save_model("pacman_best_rewards.h5")
+                            self.best_mean_reward = mean_reward
                     break
 
         return total_rewards
@@ -176,7 +183,7 @@ class PacmanAgent(object):
 
     def play(self, num_episodes):
         self.model.load_model('pacman_best_rewards.h5')
-        self.target_model.load_model(self.path_target_model)
+        #self.target_model.load_model(self.path_target_model)
 
         for episode in range(num_episodes):
             state = self.env.reset()
@@ -205,25 +212,13 @@ if __name__ == '__main__':
     env = wrappers.Monitor(env, directory=outdir, force=True)
     env.seed(0)
     agent = PacmanAgent(env)
-    total_rewards = agent.train(num_episodes=5000)
+    total_rewards = agent.train(25000)
+    agent.model.save_model("Pacman_END_Model.h5")
+    
+    plt.plot(range(len(total_rewards)), total_rewards, color="blue")
+    plt.savefig("Pacman_DQN.png")
     df = pd.DataFrame(total_rewards, columns=['Rewards'])
     df.to_csv("total_rewards.csv", index=False, mode="a", header="False")
-    #agent.play(2)
-    
-       
-
-    # for i in range(1):
-    #     state = env.reset()
-    #     total_reward = 0
-    #     while True:
-    #         action = agent.act(state)
-    #         state, reward, done, debug = env.step(action)
-    #         #print(state)
-    #         print(reward)
-    #         total_reward += reward
-    #         if done:
-    #             break
-    #     print(total_reward)
     
     env.close()
     
