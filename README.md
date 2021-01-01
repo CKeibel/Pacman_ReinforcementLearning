@@ -1,1 +1,1 @@
-Github
+Angewandte Logiken Abschlussprojekt
